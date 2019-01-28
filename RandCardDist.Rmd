@@ -1,0 +1,45 @@
+```{r}
+library(readr)
+library(reshape2)
+library(ggplot2)
+library(dplyr)
+library(plotly)
+```
+# RandCardDist <- as.data.frame(read.csv("C:/Users/jhaij/Desktop/RandCardDist.csv"))
+# RandCardDist <- t(RandCardDist)
+# RandCardDist <- melt(RandCardDist)
+# RandCardDist <- RandCardDist[c("Var1", "value")]
+# ggplot() + geom_density(RandCardDist,mapping = aes(x = value, colour = Var1)) + geom_hline(yintercept = (1/52), linetype = "dashed", colour = "black", size = 2)
+# freq <- RandCardDist %>% group_by(value) %>% summarise(freq = n()) 
+# ggplot(freq) + geom_bar(mapping = aes(x = value, y = freq))
+```{r}
+RandCardDist <- as.data.frame(read.csv("C:/Users/jhaij/Desktop/Python/Card Shuffle/orderedRandData.csv", header = FALSE))
+buckets <- paste("buckets", c(1:52))
+RandCardDist <- cbind(buckets = buckets, RandCardDist)
+RandCardDistMelt <- melt(RandCardDist, id.vars = "buckets")
+RandCardDistMelt <- RandCardDistMelt[c(1,3)]
+densPlot <- ggplot(RandCardDistMelt) + geom_density(mapping = aes(x = value, colour = buckets)) + geom_hline(yintercept = (1/52), linetype = "dashed", colour = "black", size = 2)
+buckDistPlot <- ggplot(RandCardDistMelt, aes(x = buckets, y = value)) + geom_boxplot(mapping = aes(colour = "red")) + geom_jitter(position = position_jitter(0.2))
+```
+could use plotly(a_ggplot) to get interactive plot
+
+after, select a bucket and convert it to an array using buckN <- as.data.frame.array(). then run ks.test(buckN, "punif", 1,52)
+
+ks.test:
+```{r}
+x <- RandCardDistMelt %>% dplyr::filter(buckets == "buckets 1")
+x <- x[2] %>% as.matrix()
+dd<-data.frame(x)
+ks.test(x,"punif",1,52)
+
+# ed <- ecdf(x)
+# emp <- ed
+# emp <- as.matrix(emp)
+# maxdiffidx <- which.max(abs(emp-punif(dd$x,1,52)))
+# maxdiffat <- dd$x[maxdiffidx]
+
+p<-ggplot(aes(x),data=dd)+stat_ecdf()+theme_bw()+stat_function(fun=punif,args=list(1,52))
+# p<-p+labs(title="ECDF and theoretical CDF")+geom_vline(x=maxdiffat, lty=2)
+p
+```
+
